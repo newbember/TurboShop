@@ -359,57 +359,53 @@ class ProductsView extends View
 		}
 
 		// Features
-		if (!empty($category)) {
-			$features = [];
-			$filter['features'] = [];
+		$features = [];
+		$filter['features'] = [];
 
-			foreach ($this->features->getFeatures(['category_id' => $category->id, 'in_filter' => 1]) as $feature) {
-				$features[$feature->id] = $feature;
+		foreach ($this->features->getFeatures(['in_filter' => 1]) as $feature) {
+			$features[$feature->id] = $feature;
 
-				if ($val = $this->request->get($feature->id)) {
-					$filter['features'][$feature->id] = $val;
-				}
+			if ($val = $this->request->get($feature->id)) {
+				$filter['features'][$feature->id] = $val;
 			}
-
-			$optionsFilter['visible'] = 1;
-			$featureIds = array_keys($features);
-
-			if (!empty($featureIds)) {
-				$optionsFilter['feature_id'] = $featureIds;
-			}
-
-			$optionsFilter['category_id'] = $category->children;
-
-			if (isset($filter['features'])) {
-				$optionsFilter['features'] = $filter['features'];
-			}
-
-			if (!empty($brand)) {
-				$optionsFilter['brand_id'] = $brand->id;
-			} elseif (!empty($filter['brand_id'])) {
-				$optionsFilter['brand_id'] = $filter['brand_id'];
-			}
-
-			if (!empty($priceProductIds)) {
-				$optionsFilter['product_id'] = $priceProductIds;
-			}
-
-			$options = $this->features->getOptions($optionsFilter);
-
-			foreach ($options as $option) {
-				if (isset($features[$option->feature_id])) {
-					$features[$option->feature_id]->options[] = $option;
-				}
-			}
-
-			foreach ($features as $i => &$feature) {
-				if (empty($feature->options)) {
-					unset($features[$i]);
-				}
-			}
-
-			$this->design->assign('features', $features);
 		}
+
+		$optionsFilter['visible'] = 1;
+		$featureIds = array_keys($features);
+
+		if (!empty($featureIds)) {
+			$optionsFilter['feature_id'] = $featureIds;
+		}
+
+		if (isset($filter['features'])) {
+			$optionsFilter['features'] = $filter['features'];
+		}
+
+		if (!empty($brand)) {
+			$optionsFilter['brand_id'] = $brand->id;
+		} elseif (!empty($filter['brand_id'])) {
+			$optionsFilter['brand_id'] = $filter['brand_id'];
+		}
+
+		if (!empty($priceProductIds)) {
+			$optionsFilter['product_id'] = $priceProductIds;
+		}
+
+		$options = $this->features->getOptions($optionsFilter);
+
+		foreach ($options as $option) {
+			if (isset($features[$option->feature_id])) {
+				$features[$option->feature_id]->options[] = $option;
+			}
+		}
+
+		foreach ($features as $i => &$feature) {
+			if (empty($feature->options)) {
+				unset($features[$i]);
+			}
+		}
+
+		$this->design->assign('features', $features);
 
 		// Pagination
 		$itemsPerPage = $this->settings->products_num;
